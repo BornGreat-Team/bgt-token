@@ -7,7 +7,7 @@ pragma solidity ^0.8.21;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-contract BGRMinter is Ownable {
+contract BGTMinter is Ownable {
     using SafeMath for uint256;
 
     IBGRToken public token; 
@@ -38,7 +38,6 @@ contract BGRMinter is Ownable {
             mintedThisMonth = 0;
             monthTime = block.timestamp + 30 days;
         }
-
 
         require(mintedThisMonth.add(amount) <= monthlyLimit, "Monthly limit reached");
         IBGRToken(token).mint(to, amount);

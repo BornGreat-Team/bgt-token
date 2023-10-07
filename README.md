@@ -22,7 +22,7 @@ BGT, short for "BornGreat Token," represents the culmination of cutting-edge blo
 **Getting Involved:**
 
 * Dive into our codebase, contribute to development, or report issues - your expertise is valued.
-* Join our dynamic community on [Telegram](https://t.me/BornGre8t) and Discord to connect with fellow crypto enthusiasts.
+* Join our dynamic community on [Telegram](https://t.me/+s4FRu8fVZzs4ZTgx) and Discord to connect with fellow crypto enthusiasts.
 * Stay abreast of our latest updates via [X](https://x.com/BornGre8t) and in-depth insights on [Medium](https://medium.com/BornGre8t).
 
 **Roadmap:**

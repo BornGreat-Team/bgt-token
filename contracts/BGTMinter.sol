@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 interface IBGRToken {    
     function mint(address to, uint256 amount) external;
@@ -39,8 +40,21 @@ contract BGTMinter is Ownable {
             monthTime = block.timestamp + 30 days;
         }
 
-        require(mintedThisMonth.add(amount) <= monthlyLimit, "Monthly limit reached");
+        require(mintedThisMonth + amount <= monthlyLimit, "Monthly limit reached");
         IBGRToken(token).mint(to, amount);
+        mintedThisMonth+=amount;
         releaseTime = block.timestamp + releaseWindow; 
+    }
+     function updateReleaseTime(uint256 newTime) external onlyOwner{
+        require(newTime != 0, "Time cannot be zero");
+        releaseWindow = newTime;
+    }
+    function updateMonthlyLimit(uint256 newLimit) external onlyOwner{
+        require(newLimit != 0, "Limit cannot be zero");
+        monthlyLimit = newLimit;
+    }
+
+    function getMintedThisMonth() public view returns(uint256){
+        return mintedThisMonth;
     }
 }

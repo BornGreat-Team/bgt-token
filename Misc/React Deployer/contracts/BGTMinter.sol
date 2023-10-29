@@ -1,10 +1,10 @@
 //SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.21;
+pragma solidity ^0.8.19;
 interface IBGRToken {    
     function mint(address to, uint256 amount) external;
 }
 
-pragma solidity ^0.8.21;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";

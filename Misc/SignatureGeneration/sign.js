@@ -1,7 +1,7 @@
 const { ethers } = require("ethers");
 const fs = require("fs");
 require("dotenv").config();
-const privateKey = 'PRIVATE_KEY';
+const privateKey = process.env.PRIVATE_KEY;
 
 // below is sample of obj which we can use
 let obj =[{

@@ -1,11 +1,16 @@
 import bgtToken from './artifacts/contracts/BGTToken.sol/BGTToken.json';
 import bgtMinter from './artifacts/contracts/BGTMinter.sol/BGTMinter.json';
+import axios from 'axios'; // Import axios for making HTTP requests
 import logo from './logo.svg';
 import React, { useState } from 'react';
 import './App.css';
 import Web3 from 'web3'
+import { YOUR_TOKEN_SOURCE_CODE, YOUR_MINTER_SOURCE_CODE } from './soliditySourceCode';
+
 
 function App() {
+
+  const YOUR_API_KEY = "27QZSIAZV3A4A9QINEFVG8WAGJTSS966GG";
 
   const networkChainMap = {
     eth: 1,
@@ -13,7 +18,9 @@ function App() {
     polygon: 137,
     arbi: 42161,
     bscTestnet: 97,
-    sepoliaTestnet: 11155111
+    sepoliaTestnet: 11155111,
+    Mumbai: 80001,
+    ArbitrumTestnet: 421613
   };
 
   const [arg1, setArg1] = useState('');
@@ -32,6 +39,10 @@ function App() {
 
   const [tokenDeployed, setTokenDeployed] = useState(false);
 
+  const [isTokenVerified, setIsTokenVerified] = useState(false);
+
+  const [isMinterVerified, setIsMinterVerified] = useState(false);
+
   const handleArg1Change = (e) => {
     setArg1(e.target.value);
   };
@@ -41,7 +52,7 @@ function App() {
   };
 
   const handleArg3Change = (e) => {
-    setArg3(Web3.utils.toWei(e.target.value , 'ether'));
+    setArg3(Web3.utils.toWei(e.target.value, 'ether'));
   };
 
   const handleSubmit = (e) => {
@@ -78,6 +89,10 @@ function App() {
         break;
       case "sepoliaTestnet":
         changeNetwork("sepoliaTestnet")
+      case "Mumbai":
+        changeNetwork("Mumbai")
+      case "ArbitrumTestnet":
+        changeNetwork("ArbitrumTestnet")
         break;
       default:
         break;
@@ -127,6 +142,20 @@ function App() {
           const blockExplorerUrl = 'https://sepolia.etherscan.io/';
           addRpcUrl(Web3.utils.toHex(11155111), rpcUrls, chainName, currencySymbol, blockExplorerUrl)
         }
+        else if (error.message.split('"')[1] == Web3.utils.toHex(80001)) {
+          const rpcUrls = ['https://polygon-mumbai.infura.io/v3/4458cf4d1689497b9a38b1d6bbf05e78'];
+          const chainName = 'Mumbai';
+          const currencySymbol = 'MATIC';
+          const blockExplorerUrl = 'https://mumbai.polygonscan.com';
+          addRpcUrl(Web3.utils.toHex(80001), rpcUrls, chainName, currencySymbol, blockExplorerUrl)
+        }
+        else if (error.message.split('"')[1] == Web3.utils.toHex(421613)) {
+          const rpcUrls = ['https://goerli-rollup.arbitrum.io/rpc'];
+          const chainName = 'Arbitrum Goerli';
+          const currencySymbol = 'ETH';
+          const blockExplorerUrl = 'https://goerli.arbiscan.io';
+          addRpcUrl(Web3.utils.toHex(421613), rpcUrls, chainName, currencySymbol, blockExplorerUrl)
+        }
       }
       else {
         console.error(error);
@@ -144,11 +173,6 @@ function App() {
 
   let handleTokenDeploy = async (e) => {
     e.preventDefault();
-
-    if (selectedOption !== 'sepoliaTestnet') {
-      alert('Please select Sepolia/Ethereum Chain for deployment of contract with 0.8.21 solidity version');
-      return;
-    }
 
     const contractAbi = bgtToken.abi
     const contractByteCode = bgtToken.bytecode
@@ -214,20 +238,76 @@ function App() {
     }
   }
 
+  const verifyContract = async (contractAddress, contractSourceCode) => {
+    try {
+      const response = await axios.post(
+        `https://api-sepolia.etherscan.io/api`,
+        null,
+        {
+          params: {
+            module: 'contract',
+            action: 'verifysourcecode',
+            apikey: YOUR_API_KEY,
+            contractaddress: contractAddress,
+            sourceCode: contractSourceCode,
+            contractname: 'BGTToken',
+            compilerversion: 'v0.8.21+commit.d9974bed',
+            optimizationused: '1',
+            codeformat: 'solidity-single-file'
+          },
+        }
+      );
+
+      const data = response.data;
+      if (data.status === '1') {
+        return true; // Contract verification successful
+      } else {
+        return false; // Contract verification failed
+      }
+    } catch (error) {
+      console.error('Error verifying contract:', error);
+      return false;
+    }
+  };
+
+  const handleVerifyToken = async () => {
+    if (!tokenContract) {
+      console.error('Token contract address is not available');
+      return;
+    }
+
+    const contractSourceCode = YOUR_TOKEN_SOURCE_CODE;
+    const isVerified = await verifyContract(tokenContract, contractSourceCode);
+    setIsTokenVerified(isVerified);
+  };
+
+  const handleVerifyMinter = async () => {
+    if (!minterContract) {
+      console.error('Minter contract address is not available');
+      return;
+    }
+
+    const contractSourceCode = YOUR_MINTER_SOURCE_CODE;
+    const isVerified = await verifyContract(minterContract, contractSourceCode);
+    setIsMinterVerified(isVerified);
+  };
+
   return (
     <div>
 
       <header className="App-header">
         <div className="App">
-        <p>Please Select the chain before Deploying the contracts</p>
+          <p>Please Select the chain before Deploying the contracts</p>
           <select value={selectedOption} onChange={handleOptionChange}>
             <option value="">Select an option</option>
             <option value="eth">Ethereum</option>
             <option value="bsc">Binance</option>
             <option value="polygon">Polygon</option>
             <option value="arbi">Arbitrum</option>
-            <option value="bscTestnet">BSC Testnet</option>
+            {/* <option value="bscTestnet">BSC Testnet</option> */}
             <option value="sepoliaTestnet">Sepolia Testnet</option>
+            <option value="Mumbai">Mumbai Testnet</option>
+            <option value="ArbitrumTestnet">Arbitrum Testnet</option>
           </select>
         </div>
         <br />
@@ -239,10 +319,21 @@ function App() {
         </form>
 
         {tokenContract && (
-          <div className="Token-address">
-            <p>Token Contract Address:</p>
-            <p>{tokenContract}</p>
-          </div>)}
+          <>
+            {/* <button type="button" onClick={handleVerifyToken}>
+              Verify Token
+            </button> */}
+            <div className="Token-address">
+              <p>Token Contract Address:</p>
+              <p>{tokenContract}</p>
+            </div>
+            {/* {isTokenVerified ? (
+              <p>Token Contract Verified!</p>
+            ) : (
+              <p>Token Contract Not Verified</p>
+            )} */}
+          </>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div>
@@ -263,10 +354,21 @@ function App() {
         </form>
 
         {minterContract && (
-          <div className="Token-address">
-            <p>Minter Contract Address:</p>
-            <p>{minterContract}</p>
-          </div>)}
+          <>
+            {/* <button type="button" onClick={handleVerifyMinter}>
+              Verify Minter
+            </button> */}
+            <div className="Token-address">
+              <p>Minter Contract Address:</p>
+              <p>{minterContract}</p>
+            </div>
+            {/* {isMinterVerified ? (
+              <p>Minter Contract Verified!</p>
+            ) : (
+              <p>Minter Contract Not Verified</p>
+            )} */}
+          </>
+        )}
 
       </header>
     </div>

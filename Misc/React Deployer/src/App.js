@@ -10,7 +10,7 @@ import { YOUR_TOKEN_SOURCE_CODE, YOUR_MINTER_SOURCE_CODE } from './soliditySourc
 
 function App() {
 
-  const YOUR_API_KEY = "27QZSIAZV3A4A9QINEFVG8WAGJTSS966GG";
+  const YOUR_API_KEY = "your-api-key";
 
   const networkChainMap = {
     eth: 1,

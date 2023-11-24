@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 interface IBGRToken {    
-<<<<<<< HEAD
   function mint(address to, uint256 amount) external;
 }
 
@@ -12,15 +11,6 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 =======
 >>>>>>> ab628f357cf0dc3161e8198474eb8fc1c76f083d:Misc/ReactDeployer/contracts/BGTMinter.sol
-=======
-    function mint(address to, uint256 amount) external;
-}
-
-pragma solidity ^0.8.21;
-
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
->>>>>>> ab628f357cf0dc3161e8198474eb8fc1c76f083d
 contract BGTMinter is Ownable {
     using SafeMath for uint256;
 

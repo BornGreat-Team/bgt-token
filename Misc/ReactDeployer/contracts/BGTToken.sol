@@ -1,9 +1,5 @@
 //SPDX-License-Identifier: UNLICENSED
-<<<<<<< HEAD
-pragma solidity ^0.8.19;
-=======
 pragma solidity ^0.8.21;
->>>>>>> ab628f357cf0dc3161e8198474eb8fc1c76f083d
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";

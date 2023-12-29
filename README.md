@@ -26,7 +26,7 @@ BGT, short for "BornGreat Token," represents the culmination of cutting-edge blo
 * Stay abreast of our latest updates via [X](https://x.com/BornGre8t) and in-depth insights on [Medium](https://medium.com/BornGre8t).
 
 **Roadmap:**
-Explore our ambitious [roadmap](https://borngreat.io/roadmap) detailing milestones and future plans.
+Explore our ambitious [roadmap](https://www.borngreat.io/) detailing milestones and future plans.
 
 **Contributing:**
 We enthusiastically welcome contributions from the open-source community. Please review our comprehensive Contribution Guidelines to get started.
@@ -36,4 +36,4 @@ BGT Token is open-source and operates under the permissive MIT License.
 
 As seasoned blockchain developers and crypto experts, we invite you to join us in shaping the future of decentralized finance. BGT Token is more than just a digital asset; it's a testament to the limitless possibilities of blockchain technology and the crypto ecosystem.
 
-[Official Website](https://borngreat.io) | [Whitepaper](https://borngreat.io/whitepaper)
+[Official Website](https:www.//borngreat.io) | [Whitepaper](https://www.borngreat.io/whitepaper)

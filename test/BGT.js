@@ -1,18 +1,20 @@
 const { expect } = require("chai");
 const { BigNumber } = require("ethers");
 const { ethers } = require("hardhat");
-const { time } = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("BGTToken", function () {
     let bgtToken;
     let owner;
 
     beforeEach(async function () {
+        [owner] = await ethers.getSigners();
         const BGTToken = await ethers.getContractFactory("BGTToken");
-        bgtToken = await BGTToken.deploy();
+        bgtToken = await BGTToken.deploy(
+            owner
+        );
         await bgtToken.deployed();
 
-        [owner] = await ethers.getSigners();
+
         await bgtToken.allowAddress(owner.address);
     });
 
@@ -57,104 +59,86 @@ describe("BGTToken", function () {
 
 describe("BGTMinter", function () {
     let bgtToken;
-    let bgmMinter;
+    let bgtMinter;
     let owner;
     let addr1 = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 
     beforeEach(async function () {
+        [owner] = await ethers.getSigners();
         const BGTToken = await ethers.getContractFactory("BGTToken");
-        bgtToken = await BGTToken.deploy();
+        bgtToken = await BGTToken.deploy(
+            owner
+        );
         await bgtToken.deployed();
-
         const BGTMinter = await ethers.getContractFactory("BGTMinter");
-        bgmMinter = await BGTMinter.deploy(
+        bgtMinter = await BGTMinter.deploy(
+            owner,
             bgtToken.address,
             1,
             ethers.utils.parseUnits("1000", "ether")
         );
 
-        [owner] = await ethers.getSigners();
-        await bgtToken.allowAddress(bgmMinter.address);
+
+        await bgtToken.allowAddress(bgtMinter.address);
     });
 
     it("Should deploy successfully", async function () {
-        expect(await bgmMinter.releaseWindow()).to.equal(1);
-        expect(await bgmMinter.monthlyLimit()).to.equal(ethers.utils.parseUnits("1000", "ether"));
-        expect(await bgmMinter.mintedThisMonth()).to.equal(0);
+        expect(await bgtMinter.releaseWindow()).to.equal(1);
+        expect(await bgtMinter.monthlyLimit()).to.equal(ethers.utils.parseUnits("1000", "ether"));
+        expect(await bgtMinter.mintedThisMonth()).to.equal(0);
     });
 
     it("Should mint after the time has passed", async function () {
-        
-        // Minting tokens
-        expect(await bgmMinter.connect(owner).mint(addr1, ethers.utils.parseUnits("500", "ether"))).to.emit(bgmMinter, "TokensMinted").withArgs(addr1, ethers.utils.parseUnits("500", "ether"));
+        expect(await bgtMinter.connect(owner).mint(addr1, ethers.utils.parseUnits("500", "ether"))).to.emit(bgtMinter, "TokensMinted").withArgs(addr1, ethers.utils.parseUnits("500", "ether"));
     });
 
-    it("Should not mint if the time has not passed", async function () {
-        
+    it("Should not mint if the time has not passed", async function () {        
         const BGTMinter = await ethers.getContractFactory("BGTMinter");
-        // Deploy BGTMinter with a longer release time (e.g., 1 hour)
-        const bgmMinter = await BGTMinter.deploy(
+        const bgtMinter = await BGTMinter.deploy(
             bgtToken.address,
             3600, // 1 hour
             ethers.utils.parseUnits("1000", "ether")
         );
-
-        // Allow BGTMinter to mint
-        await bgtToken.allowAddress(bgmMinter.address);
-
-        // Minting tokens
-        await expect(bgmMinter.connect(owner).mint(addr1, ethers.utils.parseUnits("500", "ether"))).to.be.revertedWith("Release time has not arrived yet");
+        await bgtToken.allowAddress(bgtMinter.address);
+        await expect(bgtMinter.connect(owner).mint(addr1, ethers.utils.parseUnits("500", "ether"))).to.be.revertedWith("Release time has not arrived yet");
     });
 
-    it("Should not mint if the monthly limit has been reached", async function () {
-        
+    it("Should not mint if the monthly limit is reached", async function () {        
         const BGTMinter = await ethers.getContractFactory("BGTMinter");
-    
-        // Deploy BGTMinter with a shorter monthly limit
-        const bgmMinter = await BGTMinter.deploy(
+        const bgtMinter = await BGTMinter.deploy(
             bgtToken.address,
             1,
             ethers.utils.parseUnits("500", "ether") // Monthly limit of 500 BGT
         );
     
-        // Allow BGTMinter to mint
-        await bgtToken.allowAddress(bgmMinter.address);
-    
-        // Mint tokens to reach the monthly limit
-        await bgmMinter.connect(owner).mint(addr1, ethers.utils.parseUnits("500", "ether"));
-    
-        // Attempt to mint more tokens (should fail)
-        await expect(bgmMinter.connect(owner).mint(addr1, ethers.utils.parseUnits("1", "ether"))).to.be.revertedWith("Monthly limit reached");
+        await bgtToken.allowAddress(bgtMinter.address);
+        await bgtMinter.connect(owner).mint(addr1, ethers.utils.parseUnits("500", "ether"));
+        await expect(bgtMinter.connect(owner).mint(addr1, ethers.utils.parseUnits("1", "ether"))).to.be.revertedWith("Monthly limit reached");
 
     });
 
     it("Should update release time", async function () {
-        expect(await bgmMinter.releaseWindow()).to.equal(1);
-
-        await bgmMinter.updateReleaseTime(7); // 7 seconds
-        expect(await bgmMinter.releaseWindow()).to.equal(7);
+        expect(await bgtMinter.releaseWindow()).to.equal(1);
+        await bgtMinter.updateReleaseTime(7); // 7 seconds
+        expect(await bgtMinter.releaseWindow()).to.equal(7);
     });
 
     it("Should update monthly limit", async function () {
-        expect(await bgmMinter.monthlyLimit()).to.equal(ethers.utils.parseUnits("1000", "ether"));
+        expect(await bgtMinter.monthlyLimit()).to.equal(ethers.utils.parseUnits("1000", "ether"));
 
-        await bgmMinter.updateMonthlyLimit(ethers.utils.parseUnits("2000", "ether"));
-        expect(await bgmMinter.monthlyLimit()).to.equal(ethers.utils.parseUnits("2000", "ether"));
+        await bgtMinter.updateMonthlyLimit(ethers.utils.parseUnits("2000", "ether"));
+        expect(await bgtMinter.monthlyLimit()).to.equal(ethers.utils.parseUnits("2000", "ether"));
     });
 
     it("Should not mint if the token allowance is not set", async function () {
         
         const BGTMinter = await ethers.getContractFactory("BGTMinter");
-    
-        // Deploy BGTMinter 
-        const bgmMinter = await BGTMinter.deploy(
+        const bgtMinter = await BGTMinter.deploy(
             bgtToken.address,
             1,
             ethers.utils.parseUnits("1000", "ether")
-        );
-    
-        // Attempt to mint tokens without allowing BGTMinter to mint
-        await expect(bgmMinter.connect(owner).mint(addr1, ethers.utils.parseUnits("500", "ether"))).to.be.revertedWith("Not allowed to mint");
+        );    
+        await expect(bgtMinter.connect(owner).mint(addr1, ethers.utils.parseUnits("500", "ether"))).to.be.revertedWith("Not allowed to mint");
     });
 });
